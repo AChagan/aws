@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS Cloudformation account management"
+Resources:
+  WholeAccountBudget:
+    Type: "AWS::Budgets::Budget"
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: 10
+          Unit: USD
+        TimeUnit: MONTHLY
+        BudgetType: COST
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 8
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: amaro.jchagan@gmail.com
+  ClimatiqAPIKey:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Name: ClimatiqAPIKey
+      Description: "This secret contains the Climatiq API Key."
+      SecretString: '{"ClimatiqAPIKey":" secret"}'
+  SecretsResourcePolicy:
+    Type: AWS::SecretsManager::ResourcePolicy
+    Properties:
+      BlockPublicPolicy: True
+      SecretId:
+        Ref: ClimatiqAPIKey
+      ResourcePolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: secretsmanager:GetSecretValue
+            Resource: "*"
+            Principal:
+              AWS:
+                Fn::Sub: arn:aws:iam::617236721161:user/amarojchagan
